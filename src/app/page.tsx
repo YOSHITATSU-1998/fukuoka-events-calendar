@@ -110,7 +110,11 @@ export default function Home() {
         
         <div className="bg-white rounded-lg shadow-lg p-8 flex justify-center">
           <Calendar
-            onChange={setDate}
+            onChange={(value) => {
+              if (value && value instanceof Date) {
+                setDate(value);
+              }
+            }}
             value={date}
             className="react-calendar-large"
             locale="ja-JP"
