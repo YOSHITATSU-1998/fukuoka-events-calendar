@@ -242,8 +242,17 @@ body {
   color: inherit !important;
 }
 
-.react-calendar-large .react-calendar__tile--active .event-count {
-  color: inherit !important;
+/* 選択された日付でも件数色を維持 */
+.react-calendar-large .react-calendar__tile--active .event-count.low-count {
+  color: #333 !important;
+}
+
+.react-calendar-large .react-calendar__tile--active .event-count.medium-count {
+  color: #f59e0b !important;
+}
+
+.react-calendar-large .react-calendar__tile--active .event-count.high-count {
+  color: #ef4444 !important;
 }
 
 /* 今日の日付を黒い枠線表示に変更 */
@@ -271,4 +280,49 @@ body {
     font-weight: 400 !important;  /* 600 → 300 に細字化 */
     opacity: 0.8;  /* 少し薄く表示 */
   }
+}
+
+/* 土曜日でも件数色を維持 */
+.react-calendar__tile:nth-child(7n-1) .event-count.medium-count {
+  color: #f59e0b !important;
+}
+
+.react-calendar__tile:nth-child(7n-1) .event-count.high-count {
+  color: #ef4444 !important;
+}
+
+/* 日曜日・祝日でも件数色を維持 */
+.react-calendar__tile:nth-child(7n) .event-count.medium-count {
+  color: #f59e0b !important;
+}
+
+.react-calendar__tile:nth-child(7n) .event-count.high-count {
+  color: #ef4444 !important;
+}
+
+/* 選択された土曜日でも件数色を維持 */
+.react-calendar__tile:nth-child(7n-1).react-calendar__tile--active .event-count.medium-count {
+  color: #f59e0b !important;
+}
+
+.react-calendar__tile:nth-child(7n-1).react-calendar__tile--active .event-count.high-count {
+  color: #ef4444 !important;
+}
+
+/* 選択された日曜日・祝日でも件数色を維持 */
+.react-calendar__tile:nth-child(7n).react-calendar__tile--active .event-count.medium-count {
+  color: #f59e0b !important;
+}
+
+.react-calendar__tile:nth-child(7n).react-calendar__tile--active .event-count.high-count {
+  color: #ef4444 !important;
+}
+/* 選択された土曜日の日付数字は土曜日色を維持 */
+.react-calendar__tile:nth-child(7n-1).react-calendar__tile--active .date-number {
+  color: #2563eb !important; /* 土曜日の青 */
+}
+
+/* 選択された日曜日・祝日の日付数字は日曜日色を維持 */
+.react-calendar__tile:nth-child(7n).react-calendar__tile--active .date-number {
+  color: #dc2626 !important; /* 日曜日の赤 */
 }

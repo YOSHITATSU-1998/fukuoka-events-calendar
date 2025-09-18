@@ -202,7 +202,9 @@ export default function Home() {
 
           <div className="mt-6 pt-4 border-t text-sm text-gray-500">
             <p>データベース内のイベント情報を表示中</p>
-            <p>対応会場: マリンメッセ、国際センター、サンパレス、PayPayドーム など</p>
+            <p>【対応会場】</p>
+            <p>マリンメッセA館・マリンメッセB館・福岡国際センター・福岡国際会議場</p>
+            <p>福岡サンパレス・みずほPayPayドーム・ベスト電器スタジアム</p>
           </div>
         </div>
       </div>
