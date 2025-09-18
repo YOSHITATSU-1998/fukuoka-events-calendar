@@ -267,8 +267,8 @@ body {
 /* スマホ専用の調整 */
 @media (max-width: 768px) {
   .event-count {
-    font-size: 10px !important;  /* 20px → 10px に縮小 */
-    font-weight: 300 !important;  /* 600 → 300 に細字化 */
+    font-size: 15px !important;  /* 20px → 15px に縮小 */
+    font-weight: 400 !important;  /* 600 → 300 に細字化 */
     opacity: 0.8;  /* 少し薄く表示 */
   }
 }
