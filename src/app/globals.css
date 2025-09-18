@@ -263,3 +263,12 @@ body {
 .react-calendar-large .react-calendar__tile--now.react-calendar__tile--active {
   border: 3px solid #2563eb !important; /* 選択された方を優先（青枠線） */
 }
+
+/* スマホ専用の調整 */
+@media (max-width: 768px) {
+  .event-count {
+    font-size: 10px !important;  /* 20px → 10px に縮小 */
+    font-weight: 300 !important;  /* 600 → 300 に細字化 */
+    opacity: 0.8;  /* 少し薄く表示 */
+  }
+}
