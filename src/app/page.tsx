@@ -187,153 +187,186 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
-          福岡イベントカレンダー
-        </h1>
+        {/* 全体を1つの白い背景でまとめる */}
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold text-center text-gray-800 mb-6 drop-shadow-lg">
+            福岡イベントカレンダー
+          </h1>
 
-        {/* カレンダー */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-          {/* ヘッダー */}
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={handlePrevMonth}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+          {/* 今日のイベントリンク */}
+          <div className="text-center mb-8 border-b border-gray-200 pb-6">
+            <a 
+              href="https://yoshitatsu-1998.github.io/event_notify/" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-sky-500 hover:bg-sky-600 text-white font-medium px-6 py-3 rounded-lg shadow-2xl transition-colors duration-200 text-lg"
             >
-              &lt;
-            </button>
-            
-            <h2 className="text-xl font-semibold">
-              {currentYear}年{monthNames[currentMonth]}
-            </h2>
-            
-            <button
-              onClick={handleNextMonth}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
-            >
-              &gt;
-            </button>
+              📅 今日のイベント情報はこちら
+            </a>
           </div>
 
-          {/* 曜日ヘッダー */}
-          <div className="grid grid-cols-7 mb-2">
-            {weekDays.map((day, index) => (
-              <div key={day} className={`text-center font-medium py-2 ${
-                index === 0 ? 'text-red-600' : 
-                index === 6 ? 'text-blue-600' : 'text-gray-700'
-              }`}>
-                {day}
-              </div>
-            ))}
-          </div>
+          {/* カレンダー */}
+          <div className="mb-8">
+            {/* ヘッダー */}
+            <div className="flex items-center justify-between mb-6">
+              <button
+                onClick={handlePrevMonth}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+              >
+                &lt;
+              </button>
+              
+              <h2 className="text-xl font-semibold">
+                {currentYear}年{monthNames[currentMonth]}
+              </h2>
+              
+              <button
+                onClick={handleNextMonth}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+              >
+                &gt;
+              </button>
+            </div>
 
-          {/* カレンダーグリッド */}
-          <div className="grid grid-cols-7 gap-1">
-            {calendar.map((dayInfo, index) => {
-              const dateString = dayInfo.date.toISOString().split('T')[0];
-              const eventCount = dayInfo.isCurrentMonth ? (monthlyEvents[dateString] || 0) : 0;
-              const isSelected = selectedDate.toDateString() === dayInfo.date.toDateString();
-              const isToday = new Date().toDateString() === dayInfo.date.toDateString();
-              const isHoliday = HolidayJp.isHoliday(dayInfo.date);
-              const weekDay = dayInfo.date.getDay();
-
-              // デバッグログ（10月1日のみ）
-              if (dayInfo.day === 1 && dayInfo.isCurrentMonth && currentMonth === 9) {
-                console.log('10月1日デバッグ:', {
-                  day: dayInfo.day,
-                  dateString,
-                  eventCount,
-                  rawCount: monthlyEvents[dateString],
-                  isCurrentMonth: dayInfo.isCurrentMonth
-                });
-              }
-
-              // 文字色決定
-              let textColor = 'text-gray-700';
-              if (!dayInfo.isCurrentMonth) {
-                textColor = 'text-gray-300';
-              } else if (isHoliday || weekDay === 0) {
-                textColor = 'text-red-600';
-              } else if (weekDay === 6) {
-                textColor = 'text-blue-600';
-              }
-
-              return (
-                <button
-                  key={index}
-                  onClick={() => setSelectedDate(dayInfo.date)}
-                  className={`
-                    min-h-[80px] p-2 border border-gray-200 hover:bg-gray-50 
-                    flex flex-col items-center justify-start rounded
-                    ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}
-                    ${isToday ? 'bg-yellow-50' : ''}
-                  `}
-                >
-                  <span className={`text-sm font-medium ${textColor} mb-1`}>
-                    {dayInfo.day}
-                  </span>
-                  
-                  {dayInfo.isCurrentMonth && eventCount > 0 && (
-                    <span className={`text-xs px-2 py-1 rounded font-medium ${
-                      eventCount >= 5 ? 'bg-red-100 text-red-800' :
-                      eventCount >= 3 ? 'bg-orange-100 text-orange-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {eventCount}件
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* イベント詳細 */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            {selectedDate.toLocaleDateString('ja-JP', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              weekday: 'long'
-            })}のイベント
-          </h2>
-
-          {loading ? (
-            <p className="text-gray-600">読み込み中...</p>
-          ) : events.length > 0 ? (
-            <div className="space-y-4">
-              {events.map((event) => (
-                <div key={event.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-blue-600">
-                      {formatTime(event.time)}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {event.venue}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {event.title}
-                  </h3>
-                  {event.notes && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      {event.notes}
-                    </p>
-                  )}
+            {/* 曜日ヘッダー */}
+            <div className="grid grid-cols-7 mb-2">
+              {weekDays.map((day, index) => (
+                <div key={day} className={`text-center font-medium py-2 ${
+                  index === 0 ? 'text-red-600' : 
+                  index === 6 ? 'text-blue-600' : 'text-gray-700'
+                }`}>
+                  {day}
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-500 text-lg">
-                この日はイベントの掲載がありません
-              </p>
-            </div>
-          )}
 
-          <div className="mt-6 pt-4 border-t text-sm text-gray-500">
-            <p>【対応会場】</p>
-            <p>マリンメッセA館・マリンメッセB館・福岡国際センター・福岡国際会議場・福岡サンパレス・みずほPayPayドーム・ベスト電器スタジアム</p>
+            {/* カレンダーグリッド */}
+            <div className="grid grid-cols-7 gap-1">
+              {calendar.map((dayInfo, index) => {
+                const dateString = dayInfo.date.toISOString().split('T')[0];
+                const eventCount = dayInfo.isCurrentMonth ? (monthlyEvents[dateString] || 0) : 0;
+                const isSelected = selectedDate.toDateString() === dayInfo.date.toDateString();
+                const isToday = new Date().toDateString() === dayInfo.date.toDateString();
+                const isHoliday = HolidayJp.isHoliday(dayInfo.date);
+                const weekDay = dayInfo.date.getDay();
+
+                // デバッグログ（10月1日のみ）
+                if (dayInfo.day === 1 && dayInfo.isCurrentMonth && currentMonth === 9) {
+                  console.log('10月1日デバッグ:', {
+                    day: dayInfo.day,
+                    dateString,
+                    eventCount,
+                    rawCount: monthlyEvents[dateString],
+                    isCurrentMonth: dayInfo.isCurrentMonth
+                  });
+                }
+
+                // 文字色決定
+                let textColor = 'text-gray-700';
+                if (!dayInfo.isCurrentMonth) {
+                  textColor = 'text-gray-300';
+                } else if (isHoliday || weekDay === 0) {
+                  textColor = 'text-red-600';
+                } else if (weekDay === 6) {
+                  textColor = 'text-blue-600';
+                }
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedDate(dayInfo.date)}
+                    className={`
+                      min-h-[80px] p-2 border border-gray-200 hover:bg-gray-50 
+                      flex flex-col items-center justify-start rounded
+                      ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}
+                      ${isToday ? 'bg-yellow-50' : ''}
+                    `}
+                  >
+                    <span className={`text-sm font-medium ${textColor} mb-1`}>
+                      {dayInfo.day}
+                    </span>
+                    
+                    {dayInfo.isCurrentMonth && eventCount > 0 && (
+                      <span className={`text-xs px-2 py-1 rounded font-medium ${
+                        eventCount >= 5 ? 'bg-red-100 text-red-800' :
+                        eventCount >= 3 ? 'bg-orange-100 text-orange-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {eventCount}件
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* イベント詳細 */}
+          <div className="border-t border-gray-200 pt-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              {selectedDate.toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+              })}のイベント
+            </h2>
+
+            {loading ? (
+              <p className="text-gray-600">読み込み中...</p>
+            ) : events.length > 0 ? (
+              <div className="space-y-4">
+                {events.map((event) => (
+                  <div key={event.id} className="border-l-4 border-blue-500 pl-4 py-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-blue-600">
+                        {formatTime(event.time)}
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        {event.venue}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-800">
+                      {event.title}
+                    </h3>
+                    {event.notes && (
+                      <p className="text-sm text-gray-600 mt-1">
+                        {event.notes}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500 text-lg">
+                  この日はイベントの掲載がありません
+                </p>
+              </div>
+            )}
+
+            {/* フッター */}
+            <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+              <div className="space-y-2 text-sm text-gray-600">
+                <p>福岡市内主要イベント会場の情報を自動収集・配信しています</p>
+                <p>
+                  対応会場: マリンメッセA館・B館、福岡国際センター、福岡国際会議場、
+                  福岡サンパレス、みずほPayPayドーム、ベスト電器スタジアム
+                </p>
+                <div className="mt-4 pt-3 border-t border-gray-100">
+                  <p className="text-blue-600 font-medium">
+                    <a 
+                      href="https://yoshitatsu-1998.github.io/event_notify/" 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline inline-flex items-center gap-1"
+                    >
+                      📅 今日のイベント情報はこちら
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
