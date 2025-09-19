@@ -211,20 +211,20 @@ export default function Home() {
             <div className="flex items-center justify-between mb-6">
               <button
                 onClick={handlePrevMonth}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition-colors text-gray-700 font-medium"
               >
-                &lt;
+                ←
               </button>
               
-              <h2 className="text-xl font-semibold">
+              <h2 className="text-xl font-semibold text-gray-800">
                 {currentYear}年{monthNames[currentMonth]}
               </h2>
               
               <button
                 onClick={handleNextMonth}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition-colors text-gray-700 font-medium"
               >
-                &gt;
+                →
               </button>
             </div>
 
