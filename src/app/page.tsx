@@ -24,9 +24,21 @@ export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const [monthlyEvents, setMonthlyEvents] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth(); // 0-11
+
+  // 画面サイズ検知
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth <= 480);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // 月間データ取得
   useEffect(() => {
@@ -201,7 +213,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="inline-block bg-sky-500 hover:bg-sky-600 text-white font-medium px-6 py-3 rounded-lg shadow-2xl transition-colors duration-200 text-lg"
             >
-              📅 今日のイベント情報はこちら
+              今日のイベントはこちら
             </a>
           </div>
 
@@ -216,7 +228,7 @@ export default function Home() {
                 ←
               </button>
               
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-2xl font-semibold text-gray-800">
                 {currentYear}年{monthNames[currentMonth]}
               </h2>
               
@@ -287,7 +299,7 @@ export default function Home() {
                     </span>
                     
                     {dayInfo.isCurrentMonth && eventCount > 0 && (
-                      <span className={`text-xs px-2 py-1 rounded font-medium ${
+                      <span className={`${isMobile ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1.5'} rounded font-medium ${
                         eventCount >= 5 ? 'bg-red-100 text-red-800' :
                         eventCount >= 3 ? 'bg-orange-100 text-orange-800' :
                         'bg-green-100 text-green-800'
@@ -304,12 +316,7 @@ export default function Home() {
           {/* イベント詳細 */}
           <div className="border-t border-gray-200 pt-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              {selectedDate.toLocaleDateString('ja-JP', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                weekday: 'long'
-              })}のイベント
+              {selectedDate.getFullYear()}年{selectedDate.getMonth() + 1}月{selectedDate.getDate()}日（{['日', '月', '火', '水', '木', '金', '土'][selectedDate.getDay()]}）のイベント
             </h2>
 
             {loading ? (
@@ -340,7 +347,7 @@ export default function Home() {
             ) : (
               <div className="text-center py-8">
                 <p className="text-gray-500 text-lg">
-                  この日はイベントの掲載がありません
+                  イベントはありません
                 </p>
               </div>
             )}
@@ -348,11 +355,35 @@ export default function Home() {
             {/* フッター */}
             <div className="mt-8 pt-6 border-t border-gray-100 text-center">
               <div className="space-y-2 text-sm text-gray-600">
-                <p>福岡市内主要イベント会場の情報を自動収集・配信しています</p>
-                <p>
-                  対応会場: マリンメッセA館・B館、福岡国際センター、福岡国際会議場、
-                  福岡サンパレス、みずほPayPayドーム、ベスト電器スタジアム
-                </p>
+                {/* PC版（1行） */}
+                <p className="venue-list-desktop">福岡市内主要イベント会場の情報を自動収集・配信しています</p>
+                
+                {/* スマホ版（2行） */}
+                <div className="venue-list-mobile">
+                  <p>福岡市内主要イベント会場の情報を</p>
+                  <p>自動収集・配信しています</p>
+                </div>
+                
+                {/* PC版（横並び） */}
+                <div className="venue-list-desktop space-y-1 mt-8">
+                  <p className="font-medium">【対応会場】</p>
+                  <p>マリンメッセA館・B館・福岡国際センター・福岡国際会議場</p>
+                  <p>福岡サンパレス・みずほPayPayドーム・ベスト電器スタジアム</p>
+                </div>
+                
+                {/* スマホ版（縦列） */}
+                <div className="venue-list-mobile mt-8">
+                  <p className="font-medium mb-2">【対応会場】</p>
+                  <ul>
+                    <li>マリンメッセA館・B館</li>
+                    <li>福岡国際センター</li>
+                    <li>福岡国際会議場</li>
+                    <li>福岡サンパレス</li>
+                    <li>みずほPayPayドーム</li>
+                    <li>ベスト電器スタジアム</li>
+                  </ul>
+                </div>
+                
                 <div className="mt-4 pt-3 border-t border-gray-100">
                   <p className="text-blue-600 font-medium">
                     <a 
