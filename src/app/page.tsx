@@ -18,9 +18,19 @@ type Event = {
   notes?: string;
 };
 
+// JST基準で今日の日付を取得する関数
+const getJSTToday = () => {
+  const now = new Date();
+  // JST = UTC+9時間
+  const jstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+  // 正午固定で日付オブジェクトを作成（カレンダーと同じ形式）
+  return new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate(), 12, 0, 0);
+};
+
 export default function Home() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  // JST基準で今日を初期値に設定
+  const [currentDate, setCurrentDate] = useState(getJSTToday);
+  const [selectedDate, setSelectedDate] = useState(getJSTToday);
   const [events, setEvents] = useState<Event[]>([]);
   const [monthlyEvents, setMonthlyEvents] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
@@ -89,6 +99,13 @@ export default function Home() {
     const fetchDayEvents = async () => {
       setLoading(true);
       const dateStr = selectedDate.toISOString().split('T')[0];
+      
+      // デバッグログ追加
+      console.log('イベント取得:', {
+        selectedDate: selectedDate.toString(),
+        dateStr,
+        isToday: dateStr === getJSTToday().toISOString().split('T')[0]
+      });
 
       try {
         const { data, error } = await supabase
@@ -97,6 +114,7 @@ export default function Home() {
           .eq('date', dateStr)
           .order('time', { ascending: true });
 
+        console.log(`取得イベント数: ${data?.length || 0}件`);
         setEvents(data || []);
       } catch (error) {
         console.error('日別データ取得エラー:', error);
@@ -140,7 +158,7 @@ export default function Home() {
     for (let day = 1; day <= daysInMonth; day++) {
       const dateObj = new Date(year, month, day, 12, 0, 0);
       if (day === 1) {
-        console.log('10月1日生成:', { 
+        console.log('1日生成:', { 
           year, 
           month, 
           day, 
@@ -187,13 +205,33 @@ export default function Home() {
   const handlePrevMonth = () => {
     const newDate = new Date(currentYear, currentMonth - 1, 1);
     setCurrentDate(newDate);
-    setSelectedDate(newDate);
+    
+    // 現在月（JST基準）かどうかを判定
+    const jstToday = getJSTToday();
+    const isCurrentMonth = (newDate.getFullYear() === jstToday.getFullYear() && 
+                           newDate.getMonth() === jstToday.getMonth());
+    
+    if (isCurrentMonth) {
+      setSelectedDate(jstToday);  // 今月なら今日を選択
+    } else {
+      setSelectedDate(newDate);   // 他月なら1日を選択
+    }
   };
 
   const handleNextMonth = () => {
     const newDate = new Date(currentYear, currentMonth + 1, 1);
     setCurrentDate(newDate);
-    setSelectedDate(newDate);
+    
+    // 現在月（JST基準）かどうかを判定
+    const jstToday = getJSTToday();
+    const isCurrentMonth = (newDate.getFullYear() === jstToday.getFullYear() && 
+                           newDate.getMonth() === jstToday.getMonth());
+    
+    if (isCurrentMonth) {
+      setSelectedDate(jstToday);  // 今月なら今日を選択
+    } else {
+      setSelectedDate(newDate);   // 他月なら1日を選択
+    }
   };
 
   return (
@@ -258,18 +296,20 @@ export default function Home() {
                 const dateString = dayInfo.date.toISOString().split('T')[0];
                 const eventCount = dayInfo.isCurrentMonth ? (monthlyEvents[dateString] || 0) : 0;
                 const isSelected = selectedDate.toDateString() === dayInfo.date.toDateString();
-                const isToday = new Date().toDateString() === dayInfo.date.toDateString();
+                const isToday = getJSTToday().toDateString() === dayInfo.date.toDateString();
                 const isHoliday = HolidayJp.isHoliday(dayInfo.date);
                 const weekDay = dayInfo.date.getDay();
 
-                // デバッグログ（10月1日のみ）
-                if (dayInfo.day === 1 && dayInfo.isCurrentMonth && currentMonth === 9) {
-                  console.log('10月1日デバッグ:', {
+                // デバッグログ（今日の日付のみ）
+                if (isToday) {
+                  console.log('今日のセル:', {
                     day: dayInfo.day,
                     dateString,
                     eventCount,
                     rawCount: monthlyEvents[dateString],
-                    isCurrentMonth: dayInfo.isCurrentMonth
+                    isCurrentMonth: dayInfo.isCurrentMonth,
+                    isToday,
+                    isSelected
                   });
                 }
 
@@ -336,7 +376,7 @@ export default function Home() {
                     <h3 className="text-lg font-medium text-gray-800">
                       {event.title}
                     </h3>
-                    {event.notes && (
+                    {event.notes && !event.notes.includes('game_status:') && (
                       <p className="text-sm text-gray-600 mt-1">
                         {event.notes}
                       </p>
@@ -352,6 +392,28 @@ export default function Home() {
               </div>
             )}
 
+            {/* 意見箱セクション */}
+            <div 
+              className="mt-8 border-l-4 border-orange-400 p-6 rounded-lg"
+              style={{ backgroundColor: '#fff5cd' }}
+            >
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">ご意見・ご要望</h3>
+                <p className="text-gray-600 mb-4">会場追加のご希望や情報漏れのご報告をお待ちしています</p>
+                <a 
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfX2EtHu3hZ2FgMfUjSOx1YYQqt2BaB3BGniVPF5TMCtgLByw/viewform" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200"
+                  style={{ backgroundColor: '#f39c12' }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = '#e67e22'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = '#f39c12'}
+                >
+                  ご意見・ご要望はこちら
+                </a>
+              </div>
+            </div>
+
             {/* フッター */}
             <div className="mt-8 pt-6 border-t border-gray-100 text-center">
               <div className="space-y-2 text-sm text-gray-600">
@@ -364,23 +426,32 @@ export default function Home() {
                   <p>自動収集・配信しています</p>
                 </div>
                 
-                {/* PC版（横並び） */}
+                {/* PC版（横並び・リンク付き） */}
                 <div className="venue-list-desktop space-y-1 mt-8">
                   <p className="font-medium">【対応会場】</p>
-                  <p>マリンメッセA館・B館・福岡国際センター・福岡国際会議場</p>
-                  <p>福岡サンパレス・みずほPayPayドーム・ベスト電器スタジアム</p>
+                  <p>
+                    <a href="https://www.marinemesse.or.jp/messe/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">マリンメッセA館</a>・
+                    <a href="https://www.marinemesse.or.jp/messe-b/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">マリンメッセB館</a>・
+                    <a href="https://www.marinemesse.or.jp/kokusai/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">福岡国際センター</a>・
+                    <a href="https://www.marinemesse.or.jp/congress/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">福岡国際会議場</a>
+                  </p>
+                  <p>
+                    <a href="https://www.f-sunpalace.com/hall/#hallEvent" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">福岡サンパレス</a>・
+                    <a href="https://www.softbankhawks.co.jp/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">みずほPayPayドーム</a>・
+                    <a href="https://www.avispa.co.jp/game_practice" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">ベスト電器スタジアム</a>
+                  </p>
                 </div>
                 
-                {/* スマホ版（縦列） */}
+                {/* スマホ版（縦列・リンク付き） */}
                 <div className="venue-list-mobile mt-8">
                   <p className="font-medium mb-2">【対応会場】</p>
                   <ul>
-                    <li>マリンメッセA館・B館</li>
-                    <li>福岡国際センター</li>
-                    <li>福岡国際会議場</li>
-                    <li>福岡サンパレス</li>
-                    <li>みずほPayPayドーム</li>
-                    <li>ベスト電器スタジアム</li>
+                    <li><a href="https://www.marinemesse.or.jp/messe/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">マリンメッセA館</a>・<a href="https://www.marinemesse.or.jp/messe-b/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">マリンメッセB館</a></li>
+                    <li><a href="https://www.marinemesse.or.jp/kokusai/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">福岡国際センター</a></li>
+                    <li><a href="https://www.marinemesse.or.jp/congress/event/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">福岡国際会議場</a></li>
+                    <li><a href="https://www.f-sunpalace.com/hall/#hallEvent" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">福岡サンパレス</a></li>
+                    <li><a href="https://www.softbankhawks.co.jp/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">みずほPayPayドーム</a></li>
+                    <li><a href="https://www.avispa.co.jp/game_practice" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800 hover:underline">ベスト電器スタジアム</a></li>
                   </ul>
                 </div>
                 

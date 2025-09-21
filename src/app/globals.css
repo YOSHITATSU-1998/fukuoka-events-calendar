@@ -403,10 +403,3 @@ body {
   }
 }
 
-/* スマホ用（480px以下）の件数バッジを小さく戻す */
-@media (max-width: 480px) {
-  .react-calendar-large .react-calendar__tile span {
-    font-size: 0.75rem !important; /* text-xs相当 */
-    padding: 0.25rem 0.5rem !important; /* px-2 py-1相当 */
-  }
-}
