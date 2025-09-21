@@ -406,8 +406,14 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="inline-block text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200"
                   style={{ backgroundColor: '#f39c12' }}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#e67e22'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = '#f39c12'}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.backgroundColor = '#e67e22';
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLElement;
+                    target.style.backgroundColor = '#f39c12';
+                  }}
                 >
                   ご意見・ご要望はこちら
                 </a>
