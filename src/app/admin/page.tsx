@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import Link from 'next/link';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -34,7 +35,7 @@ export default function AdminPage() {
   useEffect(() => {
     const checkDbConnection = async () => {
       try {
-        const { data, error, count } = await supabase
+        const { error, count } = await supabase
           .from('events')
           .select('*', { count: 'exact', head: true });
 
@@ -216,12 +217,12 @@ export default function AdminPage() {
 
           {/* カレンダーサイトに戻る */}
           <div className="text-center pt-6 border-t border-gray-200">
-            <a
+            <Link
               href="/"
               className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-lg transition-colors"
             >
               📅 カレンダーサイトに戻る
-            </a>
+            </Link>
           </div>
         </div>
       </div>
