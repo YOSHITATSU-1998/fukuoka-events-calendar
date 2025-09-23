@@ -8,11 +8,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// JST基準で今日の日付を取得する関数
-const getJSTToday = () => {
+// ユーザーローカル時間で今日の日付を取得する関数
+const getLocalToday = () => {
   const now = new Date();
-  const jstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-  return new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate(), 12, 0, 0);
+  // ユーザーのローカル時間をそのまま使用
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
 };
 
 export default function AdminPage() {
@@ -116,9 +116,9 @@ export default function AdminPage() {
   // 各種時刻情報
   const browserTime = formatDateTime(currentTime, 'ブラウザローカル時間');
   const utcTime = formatDateTime(new Date(currentTime.toISOString()), 'UTC時間');
-  const jstCalculated = formatDateTime(new Date(currentTime.getTime() + (9 * 60 * 60 * 1000)), 'JST計算結果');
-  const jstToday = getJSTToday();
-  const todayInfo = formatDateTime(jstToday, 'JST今日（正午固定）');
+  const localCalculated = formatDateTime(new Date(currentTime.getTime()), 'ローカル時間計算結果');
+  const localToday = getLocalToday();
+  const todayInfo = formatDateTime(localToday, 'ローカル今日（正午固定）');
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -141,10 +141,10 @@ export default function AdminPage() {
             {/* 時刻情報 */}
             <div className="bg-blue-50 p-6 rounded-lg">
               <h2 className="text-xl font-semibold text-blue-800 mb-4">
-                🕐 サーバー時刻情報
+                🕐 時刻情報（ローカル基準）
               </h2>
               <div className="space-y-3 text-sm font-mono">
-                {[browserTime, utcTime, jstCalculated, todayInfo].map((timeInfo) => (
+                {[browserTime, utcTime, localCalculated, todayInfo].map((timeInfo) => (
                   <div key={timeInfo.label} className="border-b border-blue-200 pb-2">
                     <div className="font-semibold text-blue-700">{timeInfo.label}</div>
                     <div className="text-gray-700">{timeInfo.datetime}</div>
@@ -180,9 +180,9 @@ export default function AdminPage() {
                 )}
 
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">JST今日の日付</span>
+                  <span className="font-medium">ローカル今日の日付</span>
                   <span className="font-mono text-blue-600">
-                    {jstToday.toISOString().split('T')[0]}
+                    {localToday.toISOString().split('T')[0]}
                   </span>
                 </div>
               </div>
@@ -208,8 +208,8 @@ export default function AdminPage() {
                 <div className="font-medium text-gray-700 mb-2">時差計算</div>
                 <div className="bg-white p-3 rounded border font-mono text-xs">
                   <div>Timezone Offset: {currentTime.getTimezoneOffset()}分</div>
-                  <div>JST Offset: +9時間 (540分)</div>
-                  <div>計算式: UTC + 9h = JST</div>
+                  <div>ローカル時間: ユーザー端末基準</div>
+                  <div>計算式: ローカル時間をそのまま使用</div>
                 </div>
               </div>
             </div>

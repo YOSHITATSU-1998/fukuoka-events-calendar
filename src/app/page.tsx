@@ -18,19 +18,17 @@ type Event = {
   notes?: string;
 };
 
-// JST基準で今日の日付を取得する関数
-const getJSTToday = () => {
+// ユーザーローカル時間で今日の日付を取得する関数
+const getLocalToday = () => {
   const now = new Date();
-  // JST = UTC+9時間
-  const jstTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-  // 正午固定で日付オブジェクトを作成（カレンダーと同じ形式）
-  return new Date(jstTime.getFullYear(), jstTime.getMonth(), jstTime.getDate(), 12, 0, 0);
+  // ユーザーのローカル時間をそのまま使用
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
 };
 
 export default function Home() {
-  // JST基準で今日を初期値に設定
-  const [currentDate, setCurrentDate] = useState(getJSTToday);
-  const [selectedDate, setSelectedDate] = useState(getJSTToday);
+  // ローカル時間基準で今日を初期値に設定
+  const [currentDate, setCurrentDate] = useState(getLocalToday);
+  const [selectedDate, setSelectedDate] = useState(getLocalToday);
   const [events, setEvents] = useState<Event[]>([]);
   const [monthlyEvents, setMonthlyEvents] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
@@ -104,7 +102,7 @@ export default function Home() {
       console.log('イベント取得:', {
         selectedDate: selectedDate.toString(),
         dateStr,
-        isToday: dateStr === getJSTToday().toISOString().split('T')[0]
+        isToday: dateStr === getLocalToday().toISOString().split('T')[0]
       });
 
       try {
@@ -206,13 +204,13 @@ export default function Home() {
     const newDate = new Date(currentYear, currentMonth - 1, 1);
     setCurrentDate(newDate);
     
-    // 現在月（JST基準）かどうかを判定
-    const jstToday = getJSTToday();
-    const isCurrentMonth = (newDate.getFullYear() === jstToday.getFullYear() && 
-                           newDate.getMonth() === jstToday.getMonth());
+    // 現在月（ローカル時間基準）かどうかを判定
+    const localToday = getLocalToday();
+    const isCurrentMonth = (newDate.getFullYear() === localToday.getFullYear() && 
+                           newDate.getMonth() === localToday.getMonth());
     
     if (isCurrentMonth) {
-      setSelectedDate(jstToday);  // 今月なら今日を選択
+      setSelectedDate(localToday);  // 今月なら今日を選択
     } else {
       setSelectedDate(newDate);   // 他月なら1日を選択
     }
@@ -222,13 +220,13 @@ export default function Home() {
     const newDate = new Date(currentYear, currentMonth + 1, 1);
     setCurrentDate(newDate);
     
-    // 現在月（JST基準）かどうかを判定
-    const jstToday = getJSTToday();
-    const isCurrentMonth = (newDate.getFullYear() === jstToday.getFullYear() && 
-                           newDate.getMonth() === jstToday.getMonth());
+    // 現在月（ローカル時間基準）かどうかを判定
+    const localToday = getLocalToday();
+    const isCurrentMonth = (newDate.getFullYear() === localToday.getFullYear() && 
+                           newDate.getMonth() === localToday.getMonth());
     
     if (isCurrentMonth) {
-      setSelectedDate(jstToday);  // 今月なら今日を選択
+      setSelectedDate(localToday);  // 今月なら今日を選択
     } else {
       setSelectedDate(newDate);   // 他月なら1日を選択
     }
@@ -296,7 +294,7 @@ export default function Home() {
                 const dateString = dayInfo.date.toISOString().split('T')[0];
                 const eventCount = dayInfo.isCurrentMonth ? (monthlyEvents[dateString] || 0) : 0;
                 const isSelected = selectedDate.toDateString() === dayInfo.date.toDateString();
-                const isToday = getJSTToday().toDateString() === dayInfo.date.toDateString();
+                const isToday = getLocalToday().toDateString() === dayInfo.date.toDateString();
                 const isHoliday = HolidayJp.isHoliday(dayInfo.date);
                 const weekDay = dayInfo.date.getDay();
 
@@ -472,6 +470,16 @@ export default function Home() {
                       📅 今日のイベント情報はこちら
                     </a>
                   </p>
+                </div>
+
+                {/* 管理者ページリンク */}
+                <div className="mt-2">
+                  <a 
+                    href="/admin" 
+                    className="text-xs text-gray-400 hover:text-gray-600 hover:underline"
+                  >
+                    管理者ページ
+                  </a>
                 </div>
               </div>
             </div>
